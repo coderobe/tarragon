@@ -1,16 +1,14 @@
 package main
 
 import (
-	"net"
+	"log"
 )
 
 type Endpoint struct {
-	NodeImpl
+	Entity
 
-	publicAddr     net.IP
-	privateAddr    net.IP
-	interfaceAddrs []net.IP
-	routes         []*net.IPNet
+	emitter      *Emitter
+	staticOnline bool
 }
 
 func NewEndpoint(name string) *Endpoint {
@@ -21,18 +19,48 @@ func NewEndpoint(name string) *Endpoint {
 	return &e
 }
 
-func (e *Endpoint) PrivateAddr() net.IP {
-	return e.privateAddr
+func (e *Endpoint) Online() bool {
+	return e.Connected() || e.staticOnline
 }
 
-func (e *Endpoint) InterfaceAddrs() []net.IP {
-	return e.interfaceAddrs
+func (e *Endpoint) SetStaticOnline(status bool) *Endpoint {
+	e.staticOnline = status
+	return e
 }
 
-func (e *Endpoint) Routes() []*net.IPNet {
-	return e.routes
+func (e *Endpoint) Disconnect() *Endpoint {
+	if e.Connected() {
+		e.Emitter().Close()
+	}
+	e.emitter = nil
+
+	return e
 }
 
-func (e *Endpoint) PublicAddr() net.IP {
-	return e.publicAddr
+func (e *Endpoint) Connected() bool {
+	return e.Emitter() != nil
+}
+
+func (e *Endpoint) Connect(emitter *Emitter) *Endpoint {
+	if e.emitter != nil {
+		log.Printf("Endpoint %v is already connected. FIXME\n", e.Name())
+	} else {
+		e.emitter = emitter
+	}
+	return e
+}
+
+func (e *Endpoint) Emitter() *Emitter {
+	return e.emitter
+}
+
+func (e *Endpoint) SetOwner(owner *User) *Endpoint {
+	if e.Owner() != nil {
+		e.Owner().Group().RemoveEndpoint(e)
+	}
+
+	e.Entity.SetOwner(owner)
+	e.owner.Group().AddEndpoint(e)
+
+	return e
 }

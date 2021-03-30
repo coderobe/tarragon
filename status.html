@@ -1,0 +1,114 @@
+<style>
+* {
+  font-family: monospace;
+  white-space: pre-wrap;
+  background: #333;
+  color: #eee;
+}
+.red {
+  color: tomato;
+  animation: heart 1s alternate infinite;
+}
+.pink {
+  color: hotpink;
+}
+@keyframes heart {
+  from { color: red }
+  to   { color: tomato }
+}
+.green {
+  color: lime;
+  background: inherit;
+}
+.screen {
+  background: #111;
+}
+.chassis {
+  background: #888;
+  color: inherit;
+}
+.blink {
+  animation: blink 500ms alternate infinite;
+}
+@keyframes blink {
+  from { color: transparent }
+  to   { color: inherit }
+}
+.group {
+  font-weight: bold;
+}
+.group::before {
+  content: "{";
+}
+.group::after {
+  content: "}";
+}
+.status-off {
+  color: red;
+  font-weight: bold;
+}
+.status-on {
+  color: green;
+  font-weight: bold;
+}
+.status-onf {
+  color: yellow;
+  font-weight: bold;
+}
+.yellow {
+  color: yellow;
+  background: inherit;
+}
+.host {
+  font-weight: bold;
+}
+.host::before {
+  content: "[";
+}
+.host::after {
+  content: "]";
+}
+a {
+  background: inherit;
+  color: pink;
+}
+</style>
+Hello, world!<span class="blink">_</span>
+     <span class="pink">_   _</span>
+    <span class="pink">|*\_/*|</span>_________  <span class="red">     .-.     .-.    </span>
+   <span class="chassis">|<span class="pink">|_/<span class="chassis">-</span>\_|</span>______  |</span>  <span class="red">    .****. .****.   </span>
+   <span class="chassis">| <span class="screen">|<span class="green"> <a href="https://github.com/coderobe/tarragon">estragon</a>  </span>|</span> |</span>  <span class="red">    .*****.*****.   </span>
+   <span class="chassis">| <span class="screen">|<span class="yellow">     _     </span>|</span> |</span>  <span class="red">     .*********.    </span>
+   <span class="chassis">| <span class="screen">|<span class="yellow">  __(.)<   </span>|</span> |</span>  <span class="red">      .*******.     </span>
+   <span class="chassis">| <span class="screen">|<span class="yellow">  \___)    </span>|</span> |</span>  <span class="red">       .*****.      </span>
+   <span class="chassis">| <span class="screen">|___________|</span> |</span>  <span class="red">        .***.       </span>
+   <span class="chassis">|_______________|</span>  <span class="red">         .*.        </span>
+     _<span class="chassis">|________|</span>_     <span class="red">          -         </span>
+    <span class="chassis">/ ********** \</span>
+   <span class="chassis">/ ************ \</span>           Mesh
+  <span class="chassis">|________________|</span>      <span class="status-onf">[{{ len .AllEndpoints }} Endpoints]</span>
+<span class="nodes">
+|-------------|
+| Node Status |
+|-------------|
+
+Users ({{ len .Users }}):
+{{- range .Users }}
+ <span class="group">{{- .Name -}}</span>
+{{- range .Endpoints }}
+   <span class="status-{{ if .Online }}on{{ else }}off{{ end }}">[{{ if .Online }}ON {{ else }}OFF{{ end }}]</span> {{ .Name }}
+{{- end }}
+{{- end }}
+
+Groups ({{ len .PureGroups }}):
+{{- range .PureGroups }}
+ <span class="group">{{- .Name -}}</span>
+   Members:
+{{- range .Groups }}
+     {{ .Name }}
+{{- end }}
+   Member endpoints:
+{{- range .Endpoints }}
+     {{ .Name }}
+{{- end }}
+{{- end }}
