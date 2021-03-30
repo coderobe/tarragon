@@ -15,10 +15,18 @@ type Instance struct {
 	send       chan Message
 	recv       chan Message
 
-	user *User
 	self *Endpoint
 
 	state *State
+}
+
+func (i *Instance) Self() *Endpoint {
+	return i.self
+}
+
+func (i *Instance) SetSelf(e *Endpoint) *Instance {
+	i.self = e
+	return i
 }
 
 func (i *Instance) Auth(token string) error {
@@ -117,6 +125,9 @@ func (i *Instance) Identify(hostname string) error {
 	msg = i.Execute(msg)
 
 	if msg.Success {
+		if e, err := i.State().GetEndpoint(msg.Data["hostname"]); err == nil {
+			i.SetSelf(e)
+		}
 		return nil
 	}
 
@@ -260,10 +271,6 @@ func (i *Instance) ConnectAndRecv() (err error) {
 	}
 
 	return
-}
-
-func (i *Instance) Disconnect() {
-	i.socket.Close()
 }
 
 func (i *Instance) Send(command Message) {

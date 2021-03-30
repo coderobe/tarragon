@@ -16,7 +16,6 @@ var statusTemplate string
 type Broker struct {
 	listenAddr string
 
-	user  *User
 	state *State
 }
 
@@ -24,14 +23,9 @@ func NewBroker(addr string) *Broker {
 	var b Broker
 	b.listenAddr = addr
 
-	b.user = NewUser(".")
 	b.state = NewState()
 
 	return &b
-}
-
-func (b *Broker) User() *User {
-	return b.user
 }
 
 func (b *Broker) State() *State {
@@ -179,6 +173,7 @@ func (b *Broker) ListenAndServe() (err error) {
 				if msg.Success {
 					log.Printf("Broker: Endpoint %v just identified\n", endpoint.Name())
 					endpoint.Connect(emitter)
+					emitter.Send(b.State().NotifyNewEndpoint(endpoint.Name(), endpoint.Owner().Name()))
 					brc := NewMessage(MessageEventEndpointOnline)
 					brc.Data["name"] = endpoint.Name()
 					b.State().Broadcast(brc)

@@ -116,6 +116,19 @@ func init() {
 							}
 						},
 					},
+					"list": CLeaf{
+						Help: "Display all instance aliases",
+						Trigger: func(option COption) {
+							log.Println("Available instances:")
+							for name, _ := range instances {
+								log.Printf("\t%s", Bold(name))
+							}
+							if len(instancename) > 0 {
+								log.Printf("Current instance: %v", Bold(instancename))
+							}
+							log.Printf("Switch with '%s'", Bold("instance select --name <name>"))
+						},
+					},
 					"state": CLeaf{
 						Help: "Display current instance state",
 						Trigger: func(option COption) {
@@ -249,6 +262,19 @@ func init() {
 									log.Println(err)
 								}
 							}
+						},
+					},
+					"list": CLeaf{
+						Help: "Display all broker aliases",
+						Trigger: func(option COption) {
+							log.Println("Available broker:")
+							for name, _ := range brokers {
+								log.Printf("\t%s", Bold(name))
+							}
+							if len(instancename) > 0 {
+								log.Printf("Current broker: %v", Bold(brokername))
+							}
+							log.Printf("Switch with '%s'", Bold("broker select --name <name>"))
 						},
 					},
 					"state": CLeaf{
@@ -456,19 +482,20 @@ func tabComplete(d prompt.Document) []prompt.Suggest {
 			cmdset = def
 		}
 	}
-	for bname, b := range cmdset.Branches {
-		s = append(s, prompt.Suggest{Text: bname, Description: b.Help})
-	}
 	if len(cmd) > 0 {
 		if l, ok := cmdset.Leaves[cmd[len(cmd)-1]]; ok {
 			for optname, opthelp := range l.Options {
 				s = append(s, prompt.Suggest{Text: Sprintf("--%s", optname), Description: opthelp})
 			}
+			return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 		} else {
 			for lname, l := range cmdset.Leaves {
 				s = append(s, prompt.Suggest{Text: lname, Description: l.Help})
 			}
 		}
+	}
+	for bname, b := range cmdset.Branches {
+		s = append(s, prompt.Suggest{Text: bname, Description: b.Help})
 	}
 
 	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
